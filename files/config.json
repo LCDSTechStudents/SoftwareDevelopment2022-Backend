@@ -1,0 +1,27 @@
+{
+  "Server": {
+    "port": ":8080",
+    "allow_cors": true
+  },
+  "services": {
+    "authorization": {
+      "db": {
+        "URL":"45.32.200.165",
+        "UserName":"root",
+        "Password":"123456",
+        "Protocol":"tcp",
+        "DBName":"production"
+      },
+      "jwt_key": "HelloWorld"
+    },
+    "FlashCards": {
+      "DB": {
+        "URL":"45.32.200.165",
+        "UserName":"root",
+        "Password":"123456",
+        "Protocol":"tcp",
+        "DBName":"production"
+      }
+    }
+  }
+}
