@@ -23,7 +23,7 @@ type Config struct {
 		} `json:"authorization"`
 		FlashCards struct {
 			DB DB
-		}
+		} `json:"flashcards"`
 	} `json:"services"`
 }
 

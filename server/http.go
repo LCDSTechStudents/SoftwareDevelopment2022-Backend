@@ -5,10 +5,13 @@ import (
 	"SoftwareDevelopment-Backend/server/content"
 	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
 	"SoftwareDevelopment-Backend/server/services/authorize/login"
+	"SoftwareDevelopment-Backend/server/services/authorize/register"
 	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
+	"github.com/RussellLuo/timingwheel"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
+	"time"
 )
 
 type HTTPServer struct {
@@ -16,6 +19,7 @@ type HTTPServer struct {
 	log    *zap.Logger
 	engine *gin.Engine
 	ctn    map[int]*content.Content
+	tw     *timingwheel.TimingWheel
 }
 
 func (s *HTTPServer) Run() error {
@@ -35,6 +39,7 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 		log:    logger,
 		engine: gin.Default(),
 		ctn:    make(map[int]*content.Content),
+		tw:     timingwheel.NewTimingWheel(time.Millisecond, 20),
 	}
 	//init content services
 	s.initContent()
@@ -68,6 +73,7 @@ func (s *HTTPServer) regHandlers() {
 	password := crypto.InitPasswordHandler(s.config)
 	token := tokenHandler.InitTokenHandler(s.config)
 	s.engine.POST("/v1/auth/login", login.LoginHandler(s.ctn[config.AUTH], password, token))
+	s.engine.POST("v1/auth/reg", register.RegHandler(s.ctn[config.AUTH], password, token, s.tw))
 
 }
 
