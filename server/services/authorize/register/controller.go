@@ -5,19 +5,19 @@ import (
 	"SoftwareDevelopment-Backend/server/services"
 	"SoftwareDevelopment-Backend/server/services/authorize"
 	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
+	"SoftwareDevelopment-Backend/server/services/authorize/io"
 	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
 	"crypto/rand"
 	"fmt"
-	"github.com/RussellLuo/timingwheel"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
 	"strings"
 )
 
-func RegHandler(content *content.Content, handler crypto.PasswordHandler, token tokenHandler.TokenHandler, tw *timingwheel.TimingWheel) gin.HandlerFunc {
+func RegHandler(content *content.Content, handler crypto.PasswordHandler, token tokenHandler.TokenHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var reg authorize.Registration
+		var reg io.Registration
 		//parse user email and password
 
 		ctx.BindJSON(&reg)
@@ -45,7 +45,7 @@ func verify(email string, pw string, nickname string) bool {
 	return false
 }
 
-func isExist(db *gorm.DB, reg *authorize.Registration) bool {
+func isExist(db *gorm.DB, reg *io.Registration) bool {
 	var user *authorize.User
 	db.Where("email = ?", reg.Email).Find(&user)
 	if user.ID != 0 {

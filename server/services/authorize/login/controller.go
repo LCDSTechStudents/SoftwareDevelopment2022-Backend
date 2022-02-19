@@ -5,6 +5,7 @@ import (
 	"SoftwareDevelopment-Backend/server/services"
 	"SoftwareDevelopment-Backend/server/services/authorize"
 	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
+	"SoftwareDevelopment-Backend/server/services/authorize/io"
 	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ import (
 
 func LoginHandler(content *content.Content, handler crypto.PasswordHandler, token tokenHandler.TokenHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var login authorize.Login
+		var login io.Login
 		//parse user email and password
 		ctx.BindJSON(&login)
 		if !verify(login.Email, login.Password) {
@@ -27,7 +28,7 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 
 		switch ok {
 		case authorize.WrongPassword:
-			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("wrong pa![](C:/Users/Kevin/AppData/Local/Temp/Web_Info.png)ssword")))
+			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("wrong password")))
 			return
 		case authorize.NoSuchUser:
 			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("not registered")))
@@ -35,7 +36,7 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 		}
 
 		//return JSON and generate token
-		ctx.JSON(http.StatusOK, services.SuccessResponse(authorize.PostUser{
+		ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostUser{
 			ID:       user.ID,
 			Email:    user.Email,
 			Nickname: user.NickName,

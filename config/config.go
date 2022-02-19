@@ -15,10 +15,17 @@ type Config struct {
 	}
 	Services struct {
 		Auth struct {
-			DB            DB     `json:"db"`
-			JWTKey        string `json:"jwt_key"`
-			PasswordCrypt string `json:"password_crypt"`
-			SMTP          struct {
+			DB                   DB     `json:"db"`
+			JWTKey               string `json:"jwt_key"`
+			PasswordCrypt        string `json:"password_crypt"`
+			VerifyCodeExpireTime string `json:"verify_code_expire_time"`
+			VerifyCodeLength     int    `json:"verify_code_length"`
+			SMTP                 struct {
+				DisplayFrom   string `json:"display_from"`
+				RemoteAddress string `json:"remote_address"`
+				UserName      string `json:"user_name"`
+				Password      string `json:"password"`
+				Host          string `json:"host"`
 			} `json:"smtp"`
 		} `json:"authorization"`
 		FlashCards struct {
@@ -87,6 +94,7 @@ func makeBlankConfig(path string, log *zap.Logger) {
 	}
 	writer := bufio.NewWriter(f)
 	var c Config
+	c.Server.Port = ":8080"
 	raw, err := json.Marshal(c)
 	if err != nil {
 		log.Fatal("writing config: ", zap.Error(err))

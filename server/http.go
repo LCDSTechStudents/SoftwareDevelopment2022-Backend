@@ -6,7 +6,10 @@ import (
 	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
 	"SoftwareDevelopment-Backend/server/services/authorize/login"
 	"SoftwareDevelopment-Backend/server/services/authorize/register"
+	"SoftwareDevelopment-Backend/server/services/authorize/smtp"
 	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
+	"SoftwareDevelopment-Backend/server/services/authorize/verifyCode"
+	"SoftwareDevelopment-Backend/server/services/authorize/verifyCodeHandler"
 	"github.com/RussellLuo/timingwheel"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -72,9 +75,11 @@ func (s *HTTPServer) regHandlers() {
 
 	password := crypto.InitPasswordHandler(s.config)
 	token := tokenHandler.InitTokenHandler(s.config)
+	code := verifyCodeHandler.InitDefaultCodeHandler(s.log, s.config)
+	smtp := smtp.InitDefaultSMTP(s.log, s.config)
 	s.engine.POST("/v1/auth/login", login.LoginHandler(s.ctn[config.AUTH], password, token))
-	s.engine.POST("v1/auth/reg", register.RegHandler(s.ctn[config.AUTH], password, token, s.tw))
-
+	s.engine.POST("/v1/auth/reg", register.RegHandler(s.ctn[config.AUTH], password, token))
+	s.engine.POST("/v1/auth/send_verify", verifyCode.VerifyCodeHandler(s.ctn[config.AUTH], code, smtp))
 }
 
 //Cors management

@@ -15,4 +15,5 @@ func initDependencies() server.Server {
 	log, _ := zap.NewDevelopment()
 	config := config.InitConfig(log)
 	return server.InitHTTPServer(config, log)
+
 }

@@ -11,9 +11,6 @@ const (
 )
 
 type TokenHandler interface {
-	GenerateTempTokenWithVerifyCode(tokenLength int, verifyCodeLength int) (string, uint)
-	VerifyTempToken(token string) bool
-	removeTempToken(token string) error
 	GenerateToken(id uint64) string
 	VerifyToken(token string) int
 }
