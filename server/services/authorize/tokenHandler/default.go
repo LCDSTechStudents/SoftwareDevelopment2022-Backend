@@ -13,7 +13,7 @@ type Claims struct {
 
 type DefaultJWT struct {
 	log     *zap.Logger
-	signKey string
+	signKey []byte
 }
 
 func (d *DefaultJWT) GenerateToken(id uint64) string {

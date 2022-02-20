@@ -8,6 +8,12 @@ type PostUser struct {
 }
 
 type PostVerify struct {
-	Email      string `json:"email"`
-	VerifyCode int    `json:"verify_code"`
+	Email string `json:"email"`
+	//VerifyCode int    `json:"verify_code"`
+}
+
+type NewUser struct {
+	ID       uint64 `json:"id"`
+	Email    string `json:"email"`
+	Nickname string `json:"nickname"`
 }

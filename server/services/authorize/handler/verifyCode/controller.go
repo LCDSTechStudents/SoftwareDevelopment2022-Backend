@@ -3,9 +3,9 @@ package verifyCode
 import (
 	"SoftwareDevelopment-Backend/server/content"
 	"SoftwareDevelopment-Backend/server/services"
-	"SoftwareDevelopment-Backend/server/services/authorize"
 	"SoftwareDevelopment-Backend/server/services/authorize/io"
 	"SoftwareDevelopment-Backend/server/services/authorize/smtp"
+	"SoftwareDevelopment-Backend/server/services/authorize/userpack"
 	"SoftwareDevelopment-Backend/server/services/authorize/verifyCodeHandler"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -39,8 +39,8 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 			}
 
 			ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostVerify{
-				Email:      verify.Email,
-				VerifyCode: verifyCode,
+				Email: verify.Email,
+				//VerifyCode: verifyCode,
 			}))
 
 			return
@@ -60,8 +60,8 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 			}
 
 			ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostVerify{
-				Email:      verify.Email,
-				VerifyCode: verifyCode,
+				Email: verify.Email,
+				//VerifyCode: verifyCode,
 			}))
 
 			return
@@ -78,7 +78,7 @@ func verifyRequest(req io.SendMail) bool {
 }
 
 func userExist(req io.SendMail, ctn *content.Content) bool {
-	var user authorize.User
+	var user userpack.User
 	ctn.Db.Where("email = ?", req.Email).Find(&user)
 	if user.ID == 0 {
 		return false

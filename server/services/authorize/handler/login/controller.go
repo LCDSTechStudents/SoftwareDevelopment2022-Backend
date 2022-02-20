@@ -3,10 +3,10 @@ package login
 import (
 	"SoftwareDevelopment-Backend/server/content"
 	"SoftwareDevelopment-Backend/server/services"
-	"SoftwareDevelopment-Backend/server/services/authorize"
 	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
 	"SoftwareDevelopment-Backend/server/services/authorize/io"
 	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
+	"SoftwareDevelopment-Backend/server/services/authorize/userpack"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -27,10 +27,10 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 		user, ok := query(login.Email, login.Password, handler, content.Db)
 
 		switch ok {
-		case authorize.WrongPassword:
+		case userpack.WrongPassword:
 			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("wrong password")))
 			return
-		case authorize.NoSuchUser:
+		case userpack.NoSuchUser:
 			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("not registered")))
 			return
 		}
@@ -39,7 +39,7 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 		ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostUser{
 			ID:       user.ID,
 			Email:    user.Email,
-			Nickname: user.NickName,
+			Nickname: user.Nickname,
 			Token:    token.GenerateToken(user.ID),
 		}))
 	}
@@ -52,14 +52,14 @@ func verify(email string, pw string) bool {
 	return false
 }
 
-func query(email string, password string, handler crypto.PasswordHandler, db *gorm.DB) (*authorize.User, int) {
-	var user *authorize.User
+func query(email string, password string, handler crypto.PasswordHandler, db *gorm.DB) (*userpack.User, int) {
+	var user *userpack.User
 	db.Where("email = ?", email).Find(&user)
 	if user.ID == 0 {
-		return nil, authorize.NoSuchUser
+		return nil, userpack.NoSuchUser
 	}
 	if !handler.Check(password, user.Password) {
-		return user, authorize.WrongPassword
+		return user, userpack.WrongPassword
 	}
-	return user, authorize.Success
+	return user, userpack.Success
 }

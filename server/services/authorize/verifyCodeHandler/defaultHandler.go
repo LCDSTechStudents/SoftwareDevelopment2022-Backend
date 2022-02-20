@@ -25,11 +25,10 @@ type DefaultCodeHandler struct {
 	log                   *zap.Logger
 	config                *config.Config
 	cache                 *cache.Cache
-	seed                  int64
 }
 
 func (d *DefaultCodeHandler) NewCode(email string) int {
-	code := d.generateCode(d.seed, d.config.Services.Auth.VerifyCodeLength)
+	code := d.generateCode(d.config.Services.Auth.VerifyCodeLength)
 	d.cache.Set(email, code, cache.DefaultExpiration)
 	return code
 }
@@ -45,11 +44,7 @@ func (d *DefaultCodeHandler) CheckCode(email string, code int) int {
 	return INCORRECTCODE
 }
 
-func (d *DefaultCodeHandler) generateCode(seed int64, length int) int {
-	//rnd := rand.New(rand.NewSource(seed))
-	//vcode := rnd.Int31n(1000000)
-	//seed ++
-	//return int(vcode)
+func (d *DefaultCodeHandler) generateCode(length int) int {
 	var sb strings.Builder
 
 	for i := 0; i < length; i++ {
@@ -66,7 +61,6 @@ func InitDefaultCodeHandler(logger *zap.Logger, config *config.Config) *DefaultC
 		randomCandidate:       randomNumberCandidate,
 		randomCandidateLength: len(randomNumberCandidate),
 		cache:                 cache.New(5*time.Minute, 10*time.Minute),
-		seed:                  0,
 		config:                config,
 		log:                   logger,
 	}

@@ -4,11 +4,12 @@ import (
 	"SoftwareDevelopment-Backend/config"
 	"SoftwareDevelopment-Backend/server/content"
 	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
-	"SoftwareDevelopment-Backend/server/services/authorize/login"
-	"SoftwareDevelopment-Backend/server/services/authorize/register"
+	"SoftwareDevelopment-Backend/server/services/authorize/handler/login"
+	"SoftwareDevelopment-Backend/server/services/authorize/handler/register"
+	"SoftwareDevelopment-Backend/server/services/authorize/handler/verifyCode"
+	"SoftwareDevelopment-Backend/server/services/authorize/idGenerator"
 	"SoftwareDevelopment-Backend/server/services/authorize/smtp"
 	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
-	"SoftwareDevelopment-Backend/server/services/authorize/verifyCode"
 	"SoftwareDevelopment-Backend/server/services/authorize/verifyCodeHandler"
 	"github.com/RussellLuo/timingwheel"
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,7 @@ func (s *HTTPServer) Run() error {
 	if err := s.engine.Run(s.config.Server.Port); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -74,11 +76,13 @@ func (s *HTTPServer) initContent() {
 func (s *HTTPServer) regHandlers() {
 
 	password := crypto.InitPasswordHandler(s.config)
-	token := tokenHandler.InitTokenHandler(s.config)
+	token := tokenHandler.InitTokenHandler(s.config, s.log)
 	code := verifyCodeHandler.InitDefaultCodeHandler(s.log, s.config)
 	smtp := smtp.InitDefaultSMTP(s.log, s.config)
+	idGen := idGenerator.InitDefaultIDGenerator()
+
 	s.engine.POST("/v1/auth/login", login.LoginHandler(s.ctn[config.AUTH], password, token))
-	s.engine.POST("/v1/auth/reg", register.RegHandler(s.ctn[config.AUTH], password, token))
+	s.engine.POST("/v1/auth/reg", register.RegHandler(s.ctn[config.AUTH], password, code, idGen))
 	s.engine.POST("/v1/auth/send_verify", verifyCode.VerifyCodeHandler(s.ctn[config.AUTH], code, smtp))
 }
 

@@ -6,9 +6,9 @@ const (
 )
 
 type DB struct {
-	URL      string `json:"URL"`
-	UserName string `json:"UserName"`
-	Password string `json:"Password"`
-	Protocol string `json:"Protocol"`
-	DBName   string `json:"DBName"`
+	URL      string `json:"url"`
+	UserName string `json:"user_name"`
+	Password string `json:"password"`
+	Protocol string `json:"protocol"`
+	DBName   string `json:"db_name"`
 }

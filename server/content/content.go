@@ -23,6 +23,7 @@ func InitContent(config *config.Config, log *zap.Logger, service int) *Content {
 	return &Content{
 		Config: config,
 		Db:     db,
+		Log:    log,
 	}
 }
 

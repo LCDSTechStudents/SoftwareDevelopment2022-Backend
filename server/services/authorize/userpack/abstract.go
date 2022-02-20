@@ -1,4 +1,4 @@
-package authorize
+package userpack
 
 const (
 	Success       = 1
@@ -9,6 +9,6 @@ const (
 type User struct {
 	ID       uint64 `json:"id"`
 	Email    string `json:"email"`
-	NickName string `json:"nickname"`
+	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 }

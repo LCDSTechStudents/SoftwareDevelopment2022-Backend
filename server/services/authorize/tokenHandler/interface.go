@@ -1,6 +1,9 @@
 package tokenHandler
 
-import "SoftwareDevelopment-Backend/config"
+import (
+	"SoftwareDevelopment-Backend/config"
+	"go.uber.org/zap"
+)
 
 const (
 	Error          = 0
@@ -15,8 +18,9 @@ type TokenHandler interface {
 	VerifyToken(token string) int
 }
 
-func InitTokenHandler(config *config.Config) TokenHandler {
+func InitTokenHandler(config *config.Config, log *zap.Logger) TokenHandler {
 	return &DefaultJWT{
-		signKey: config.Services.Auth.JWTKey,
+		signKey: []byte(config.Services.Auth.JWTKey),
+		log:     log,
 	}
 }
