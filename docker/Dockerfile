@@ -5,5 +5,5 @@ COPY ./files /files
 
 WORKDIR /
 
-EXPOSE 8081
+EXPOSE 1001
 CMD ["/main"]
