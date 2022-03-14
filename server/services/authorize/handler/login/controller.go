@@ -2,11 +2,11 @@ package login
 
 import (
 	"SoftwareDevelopment-Backend/server/content"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/crypto"
+	io2 "SoftwareDevelopment-Backend/server/internalsvc/authorize/io"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/tokenHandler"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/userpack"
 	"SoftwareDevelopment-Backend/server/services"
-	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
-	"SoftwareDevelopment-Backend/server/services/authorize/io"
-	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
-	"SoftwareDevelopment-Backend/server/services/authorize/userpack"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ import (
 
 func LoginHandler(content *content.Content, handler crypto.PasswordHandler, token tokenHandler.TokenHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var login io.Login
+		var login io2.Login
 		//parse user email and password
 		ctx.BindJSON(&login)
 		if !verify(login.Email, login.Password) {
@@ -36,7 +36,7 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 		}
 
 		//return JSON and generate token
-		ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostUser{
+		ctx.JSON(http.StatusOK, services.SuccessResponse(io2.PostUser{
 			ID:       user.ID,
 			Email:    user.Email,
 			Nickname: user.Nickname,

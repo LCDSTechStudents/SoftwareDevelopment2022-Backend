@@ -3,15 +3,17 @@ package server
 import (
 	"SoftwareDevelopment-Backend/config"
 	"SoftwareDevelopment-Backend/server/content"
-	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
+	"SoftwareDevelopment-Backend/server/internalsvc"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/crypto"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/idGenerator"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/smtp"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/tokenHandler"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/verifyCodeHandler"
 	"SoftwareDevelopment-Backend/server/services/authorize/handler/login"
 	"SoftwareDevelopment-Backend/server/services/authorize/handler/register"
 	"SoftwareDevelopment-Backend/server/services/authorize/handler/verifyCode"
-	"SoftwareDevelopment-Backend/server/services/authorize/idGenerator"
-	"SoftwareDevelopment-Backend/server/services/authorize/smtp"
-	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
-	"SoftwareDevelopment-Backend/server/services/authorize/verifyCodeHandler"
 	"github.com/RussellLuo/timingwheel"
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -24,6 +26,7 @@ type HTTPServer struct {
 	engine *gin.Engine
 	ctn    map[int]*content.Content
 	tw     *timingwheel.TimingWheel
+	internals map[string]internalsvc.Internal
 }
 
 func (s *HTTPServer) Run() error {
@@ -42,13 +45,25 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 	s := &HTTPServer{
 		config: config,
 		log:    logger,
-		engine: gin.Default(),
+		engine: gin.New(),
 		ctn:    make(map[int]*content.Content),
 		tw:     timingwheel.NewTimingWheel(time.Millisecond, 20),
 	}
-	//init content services
-	s.initContent()
+	//use zap to substitute original logger
+	s.engine.Use(ginzap.Ginzap(logger, time.RFC3339,true))
 
+	if config.Server.AllowCors {
+		logger.Info("Server allow cors enabled")
+		s.engine.Use(Cors())
+	} else {
+		logger.Info("Server allow cors disabled")
+	}
+
+	//init content services
+
+	s.InitInternalSvc()
+
+	s.initContent()
 	//set mode
 	gin.SetMode(gin.DebugMode)
 
@@ -58,12 +73,6 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 	s.regHandlers()
 
 	//allow cors
-	if config.Server.AllowCors {
-		logger.Info("Server allow cors enabled")
-		s.engine.Use(Cors())
-	} else {
-		logger.Info("Server allow cors disabled")
-	}
 
 	return s
 }
@@ -103,4 +112,9 @@ func Cors() gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+
+func (s *HTTPServer) InitInternalSvc(){
+	s.internals[]
 }

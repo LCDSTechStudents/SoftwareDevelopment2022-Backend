@@ -2,11 +2,11 @@ package verifyCode
 
 import (
 	"SoftwareDevelopment-Backend/server/content"
+	io2 "SoftwareDevelopment-Backend/server/internalsvc/authorize/io"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/smtp"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/userpack"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/verifyCodeHandler"
 	"SoftwareDevelopment-Backend/server/services"
-	"SoftwareDevelopment-Backend/server/services/authorize/io"
-	"SoftwareDevelopment-Backend/server/services/authorize/smtp"
-	"SoftwareDevelopment-Backend/server/services/authorize/userpack"
-	"SoftwareDevelopment-Backend/server/services/authorize/verifyCodeHandler"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,7 +15,7 @@ import (
 
 func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCodeHandler, smtp smtp.EmailHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var verify io.SendMail
+		var verify io2.SendMail
 		//parse user email and password
 		ctx.BindJSON(&verify)
 
@@ -25,7 +25,7 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 			return
 		}
 
-		if verify.Target == io.FINDPW {
+		if verify.Target == io2.FINDPW {
 			//if user not found
 			if !userExist(verify, content) {
 				ctx.JSON(http.StatusNotFound, services.ErrorResponse(fmt.Errorf("user not registered")))
@@ -38,7 +38,7 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 				return
 			}
 
-			ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostVerify{
+			ctx.JSON(http.StatusOK, services.SuccessResponse(io2.PostVerify{
 				Email: verify.Email,
 				//VerifyCode: verifyCode,
 			}))
@@ -46,7 +46,7 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 			return
 		}
 
-		if verify.Target == io.REGISTER {
+		if verify.Target == io2.REGISTER {
 			//if user not found
 			if userExist(verify, content) {
 				ctx.JSON(http.StatusNotFound, services.ErrorResponse(fmt.Errorf("user already exists")))
@@ -59,7 +59,7 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 				return
 			}
 
-			ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostVerify{
+			ctx.JSON(http.StatusOK, services.SuccessResponse(io2.PostVerify{
 				Email: verify.Email,
 				//VerifyCode: verifyCode,
 			}))
@@ -70,14 +70,14 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 
 }
 
-func verifyRequest(req io.SendMail) bool {
+func verifyRequest(req io2.SendMail) bool {
 	if req.Email != "" && strings.Contains(req.Email, "@") {
 		return true
 	}
 	return false
 }
 
-func userExist(req io.SendMail, ctn *content.Content) bool {
+func userExist(req io2.SendMail, ctn *content.Content) bool {
 	var user userpack.User
 	ctn.Db.Where("email = ?", req.Email).Find(&user)
 	if user.ID == 0 {

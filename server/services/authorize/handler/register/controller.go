@@ -2,12 +2,12 @@ package register
 
 import (
 	"SoftwareDevelopment-Backend/server/content"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/crypto"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/idGenerator"
+	io2 "SoftwareDevelopment-Backend/server/internalsvc/authorize/io"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize/userpack"
+	verifyCodeHandler2 "SoftwareDevelopment-Backend/server/internalsvc/authorize/verifyCodeHandler"
 	"SoftwareDevelopment-Backend/server/services"
-	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
-	"SoftwareDevelopment-Backend/server/services/authorize/idGenerator"
-	"SoftwareDevelopment-Backend/server/services/authorize/io"
-	"SoftwareDevelopment-Backend/server/services/authorize/userpack"
-	"SoftwareDevelopment-Backend/server/services/authorize/verifyCodeHandler"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -16,9 +16,9 @@ import (
 	"strings"
 )
 
-func RegHandler(content *content.Content, handler crypto.PasswordHandler, code verifyCodeHandler.VerifyCodeHandler, id idGenerator.IDGenerator) gin.HandlerFunc {
+func RegHandler(content *content.Content, handler crypto.PasswordHandler, code verifyCodeHandler2.VerifyCodeHandler, id idGenerator.IDGenerator) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var reg io.Registration
+		var reg io2.Registration
 		//parse user email and password
 
 		ctx.BindJSON(&reg)
@@ -39,10 +39,10 @@ func RegHandler(content *content.Content, handler crypto.PasswordHandler, code v
 		//}
 		//verify code here
 		switch code.CheckCode(reg.Email, reg.VerifyCode) {
-		case verifyCodeHandler.INCORRECTCODE:
+		case verifyCodeHandler2.INCORRECTCODE:
 			ctx.JSON(http.StatusInternalServerError, services.ErrorResponse(fmt.Errorf("incorrect verification code")))
 			return
-		case verifyCodeHandler.DIDNOTFINDEMAIL:
+		case verifyCodeHandler2.DIDNOTFINDEMAIL:
 			ctx.JSON(http.StatusInternalServerError, services.ErrorResponse(fmt.Errorf("you did not send an verification code")))
 			return
 		}
@@ -53,7 +53,7 @@ func RegHandler(content *content.Content, handler crypto.PasswordHandler, code v
 			return
 		}
 
-		ctx.JSON(http.StatusOK, services.SuccessResponse(io.NewUser{
+		ctx.JSON(http.StatusOK, services.SuccessResponse(io2.NewUser{
 			ID:       user.ID,
 			Email:    user.Email,
 			Nickname: user.Nickname,
@@ -69,7 +69,7 @@ func verify(email string, pw string, nickname string) bool {
 	return false
 }
 
-func isExist(db *gorm.DB, reg *io.Registration) bool {
+func isExist(db *gorm.DB, reg *io2.Registration) bool {
 	var user *userpack.User
 	db.Where("email = ?", reg.Email).Find(&user)
 	if user.ID != 0 {
@@ -85,7 +85,7 @@ func isExist(db *gorm.DB, reg *io.Registration) bool {
 //	return false
 //}
 
-func addUser(content *content.Content, reg io.Registration, pw crypto.PasswordHandler, generator idGenerator.IDGenerator) (*userpack.User, error) {
+func addUser(content *content.Content, reg io2.Registration, pw crypto.PasswordHandler, generator idGenerator.IDGenerator) (*userpack.User, error) {
 
 	user := userpack.User{
 		ID:       <-generator.GetIDChan(),
