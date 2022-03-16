@@ -7,6 +7,7 @@ import (
 	"SoftwareDevelopment-Backend/server/internalsvc/authorize/smtp"
 	"SoftwareDevelopment-Backend/server/internalsvc/authorize/tokenHandler"
 	"go.uber.org/zap"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +27,7 @@ type DefaultAuthorizer struct{
 
 func InitDefaultAuthorizer(log *zap.Logger, config *config.Config) IAuthorizer{
 	dsn := getDSN(config.Services.Auth.DB, log)
-	gorm.Open(mysql.)
+	gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	r := &DefaultAuthorizer{
 		Logger:       log,
 		config:       config,
