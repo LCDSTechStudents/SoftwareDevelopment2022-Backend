@@ -25,18 +25,26 @@ type DefaultAuthorizer struct{
 	crypto crypto.PasswordHandler
 }
 
+func (d DefaultAuthorizer) Run() error {
+	panic("implement me")
+}
+
 func InitDefaultAuthorizer(log *zap.Logger, config *config.Config) IAuthorizer{
 	dsn := getDSN(config.Services.Auth.DB, log)
-	gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil{
+		log.
+	}
 	r := &DefaultAuthorizer{
 		Logger:       log,
 		config:       config,
 		db:           db,
-		idGen:        ,
+		idGen:        idGenerator.InitDefaultIDGenerator(),
 		tokenHandler: nil,
 		smtp:         nil,
 		crypto:       nil,
 	}
+	return r
 }
 
 func getDSN(DB config.DB, log *zap.Logger) string {
