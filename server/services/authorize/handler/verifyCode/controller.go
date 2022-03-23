@@ -79,7 +79,8 @@ func verifyRequest(req io2.SendMail) bool {
 
 func userExist(req io2.SendMail, ctn *content.Content) bool {
 	var user userpack.User
-	ctn.Db.Where("email = ?", req.Email).Find(&user)
+	//TODO: adjust DB connection
+	//ctn.Db.Where("email = ?", req.Email).Find(&user)
 	if user.ID == 0 {
 		return false
 	}

@@ -8,10 +8,10 @@ import (
 type Content struct {
 	Log    *zap.Logger
 	Config *config.Config
-	Data   []interface{}
+	Data   map[string]interface{}
 }
 
-func InitContent(config *config.Config, log *zap.Logger, service int, data ...interface{}) *Content {
+func InitContent(config *config.Config, log *zap.Logger, service int, data map[string]interface{}) *Content {
 	return &Content{
 		Config: config,
 		Log:    log,

@@ -15,25 +15,25 @@ const (
 	NAME = "AUTH"
 )
 
-type DefaultAuthorizer struct{
+type DefaultAuthorizer struct {
 	*zap.Logger
-	config *config.Config
-	db *gorm.DB
-	idGen idGenerator.IDGenerator
+	config       *config.Config
+	db           *gorm.DB
+	idGen        idGenerator.IDGenerator
 	tokenHandler tokenHandler.TokenHandler
-	smtp smtp.EmailHandler
-	crypto crypto.PasswordHandler
+	smtp         smtp.EmailHandler
+	crypto       crypto.PasswordHandler
 }
 
 func (d DefaultAuthorizer) Run() error {
 	panic("implement me")
 }
 
-func InitDefaultAuthorizer(log *zap.Logger, config *config.Config) IAuthorizer{
+func InitDefaultAuthorizer(log *zap.Logger, config *config.Config) IAuthorizer {
 	dsn := getDSN(config.Services.Auth.DB, log)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil{
-		log.
+	if err != nil {
+		//TODO: log
 	}
 	r := &DefaultAuthorizer{
 		Logger:       log,
@@ -54,7 +54,6 @@ func getDSN(DB config.DB, log *zap.Logger) string {
 	url := DB.URL
 	dn := DB.DBName
 	r := un + ":" + pc + "@" + prtc + "(" + url + ")/" + dn
-	log.Info("getting dsn: "+ r)
+	log.Info("getting dsn: " + r)
 	return r
 }
-

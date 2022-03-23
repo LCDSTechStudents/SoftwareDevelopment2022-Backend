@@ -24,7 +24,8 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 		}
 
 		//query if exist and valid
-		user, ok := query(login.Email, login.Password, handler, content.Db)
+		//TODO: Verify
+		user, ok := query(login.Email, login.Password, handler, content.Data["DB"].(*gorm.DB))
 
 		switch ok {
 		case userpack.WrongPassword:

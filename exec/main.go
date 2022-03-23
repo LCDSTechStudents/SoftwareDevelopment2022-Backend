@@ -4,11 +4,15 @@ import (
 	"SoftwareDevelopment-Backend/config"
 	"SoftwareDevelopment-Backend/logger"
 	"SoftwareDevelopment-Backend/server"
+	_default "SoftwareDevelopment-Backend/server/internalsvc/recognition/default"
+	"fmt"
 )
 
 func main() {
-	s := initDependencies()
-	s.Run()
+	//s := initDependencies()
+	//s.Run()
+	fmt.Println(_default.ToBinary("./files/refacto/space_shuttle.jpg"))
+
 }
 
 func initDependencies() server.Server {

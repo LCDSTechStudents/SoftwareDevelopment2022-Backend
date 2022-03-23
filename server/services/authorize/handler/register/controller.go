@@ -10,7 +10,6 @@ import (
 	"SoftwareDevelopment-Backend/server/services"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"net/http"
 	"strings"
@@ -28,7 +27,7 @@ func RegHandler(content *content.Content, handler crypto.PasswordHandler, code v
 		}
 
 		//query if use is exists
-		if isExist(content.Db, &reg) {
+		if isExist(content.Data["DB"].(*gorm.DB), &reg) {
 			ctx.JSON(http.StatusNotAcceptable, services.ErrorResponse(fmt.Errorf("user already exists")))
 			return
 		}
@@ -87,17 +86,18 @@ func isExist(db *gorm.DB, reg *io2.Registration) bool {
 
 func addUser(content *content.Content, reg io2.Registration, pw crypto.PasswordHandler, generator idGenerator.IDGenerator) (*userpack.User, error) {
 
-	user := userpack.User{
-		ID:       <-generator.GetIDChan(),
-		Email:    reg.Email,
-		Nickname: reg.Nickname,
-		Password: pw.HashPassword(reg.Password),
-	}
-	result := content.Db.Create(&user)
-	if result.Error != nil {
-		content.Log.Error("making a new user: ", zap.Error(result.Error))
-		return nil, result.Error
-	}
-	content.Log.Info("a new user created ")
-	return &user, nil
+	//user := userpack.User{
+	//	ID:       <-generator.GetIDChan(),
+	//	Email:    reg.Email,
+	//	Nickname: reg.Nickname,
+	//	Password: pw.HashPassword(reg.Password),
+	//}
+	//result := content.Db.Create(&user)
+	//if result.Error != nil {
+	//	content.Log.Error("making a new user: ", zap.Error(result.Error))
+	//	return nil, result.Error
+	//}
+	//content.Log.Info("a new user created ")
+	//return &user, nil
+	return nil, nil
 }

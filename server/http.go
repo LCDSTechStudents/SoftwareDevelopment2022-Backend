@@ -21,11 +21,11 @@ import (
 )
 
 type HTTPServer struct {
-	config *config.Config
-	log    *zap.Logger
-	engine *gin.Engine
-	ctn    map[int]*content.Content
-	tw     *timingwheel.TimingWheel
+	config    *config.Config
+	log       *zap.Logger
+	engine    *gin.Engine
+	ctn       map[int]*content.Content
+	tw        *timingwheel.TimingWheel
 	internals map[string]internalsvc.Internal
 }
 
@@ -50,7 +50,7 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 		tw:     timingwheel.NewTimingWheel(time.Millisecond, 20),
 	}
 	//use zap to substitute original logger
-	s.engine.Use(ginzap.Ginzap(logger, time.RFC3339,true))
+	s.engine.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 
 	if config.Server.AllowCors {
 		logger.Info("Server allow cors enabled")
@@ -78,7 +78,7 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 }
 
 func (s *HTTPServer) initContent() {
-	s.ctn[config.AUTH] = content.InitContent(s.config, s.log, config.AUTH)
+	s.ctn[config.AUTH] = content.InitContent(s.config, s.log, config.AUTH, nil)
 }
 
 //router initialize
@@ -114,7 +114,6 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
-
-func (s *HTTPServer) InitInternalSvc(){
-	s.internals[]
+func (s *HTTPServer) InitInternalSvc() {
+	//s.internals[]
 }
