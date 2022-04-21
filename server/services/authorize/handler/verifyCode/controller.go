@@ -2,10 +2,9 @@ package verifyCode
 
 import (
 	"SoftwareDevelopment-Backend/server/content"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize"
 	io2 "SoftwareDevelopment-Backend/server/internalsvc/authorize/io"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/smtp"
 	"SoftwareDevelopment-Backend/server/internalsvc/authorize/userpack"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/verifyCodeHandler"
 	"SoftwareDevelopment-Backend/server/services"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -13,10 +12,11 @@ import (
 	"strings"
 )
 
-func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCodeHandler, smtp smtp.EmailHandler) gin.HandlerFunc {
+func VerifyCodeHandler(content *content.Content) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var verify io2.SendMail
 		//parse user email and password
+		auth := content.Data[authorize.AUTHORIZER].(*authorize.DefaultAuthorizer)
 		ctx.BindJSON(&verify)
 
 		//verify validation of email
@@ -28,19 +28,18 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 		if verify.Target == io2.FINDPW {
 			//if user not found
 			if !userExist(verify, content) {
-				ctx.JSON(http.StatusNotFound, services.ErrorResponse(fmt.Errorf("user not registered")))
+				ctx.JSON(http.StatusOK, services.ErrorResponse(fmt.Errorf("user not registered")))
 				return
 			}
 
-			verifyCode := code.NewCode(verify.Email)
-			if err := smtp.SendCode(verify.Email, verifyCode); err != nil {
+			verifyCode := auth.NewCode(verify.Email)
+			if err := auth.SendCode(verify.Email, verifyCode); err != nil {
 				ctx.JSON(http.StatusInternalServerError, services.ErrorResponse(fmt.Errorf("an error occur while sending email, please try again later")))
 				return
 			}
 
 			ctx.JSON(http.StatusOK, services.SuccessResponse(io2.PostVerify{
 				Email: verify.Email,
-				//VerifyCode: verifyCode,
 			}))
 
 			return
@@ -53,8 +52,8 @@ func VerifyCodeHandler(content *content.Content, code verifyCodeHandler.VerifyCo
 				return
 			}
 
-			verifyCode := code.NewCode(verify.Email)
-			if err := smtp.SendCode(verify.Email, verifyCode); err != nil {
+			verifyCode := auth.NewCode(verify.Email)
+			if err := auth.SendCode(verify.Email, verifyCode); err != nil {
 				ctx.JSON(http.StatusInternalServerError, services.ErrorResponse(fmt.Errorf("an error occur while sending email, please try again later")))
 				return
 			}

@@ -4,11 +4,7 @@ import (
 	"SoftwareDevelopment-Backend/config"
 	"SoftwareDevelopment-Backend/server/content"
 	"SoftwareDevelopment-Backend/server/internalsvc"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/crypto"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/idGenerator"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/smtp"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/tokenHandler"
-	"SoftwareDevelopment-Backend/server/internalsvc/authorize/verifyCodeHandler"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize"
 	"SoftwareDevelopment-Backend/server/services/authorize/handler/login"
 	"SoftwareDevelopment-Backend/server/services/authorize/handler/register"
 	"SoftwareDevelopment-Backend/server/services/authorize/handler/verifyCode"
@@ -61,8 +57,6 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 
 	//init content services
 
-	s.InitInternalSvc()
-
 	s.initContent()
 	//set mode
 	gin.SetMode(gin.DebugMode)
@@ -78,21 +72,17 @@ func InitHTTPServer(config *config.Config, logger *zap.Logger) Server {
 }
 
 func (s *HTTPServer) initContent() {
-	s.ctn[config.AUTH] = content.InitContent(s.config, s.log, config.AUTH, nil)
+	authData := make(map[string]interface{})
+	authData[authorize.AUTHORIZER] = authorize.InitDefaultAuthorizer(s.log, s.config)
+	s.ctn[config.AUTH] = content.InitContent(s.config, s.log, config.AUTH, authData)
+
 }
 
 //router initialize
 func (s *HTTPServer) regHandlers() {
-
-	password := crypto.InitPasswordHandler(s.config)
-	token := tokenHandler.InitTokenHandler(s.config, s.log)
-	code := verifyCodeHandler.InitDefaultCodeHandler(s.log, s.config)
-	smtp := smtp.InitDefaultSMTP(s.log, s.config)
-	idGen := idGenerator.InitDefaultIDGenerator()
-
-	s.engine.POST("/v1/auth/login", login.LoginHandler(s.ctn[config.AUTH], password, token))
-	s.engine.POST("/v1/auth/reg", register.RegHandler(s.ctn[config.AUTH], password, code, idGen))
-	s.engine.POST("/v1/auth/send_verify", verifyCode.VerifyCodeHandler(s.ctn[config.AUTH], code, smtp))
+	s.engine.POST("/v1/auth/login", login.LoginHandler(s.ctn[config.AUTH]))
+	s.engine.POST("/v1/auth/reg", register.RegHandler(s.ctn[config.AUTH]))
+	s.engine.POST("/v1/auth/send_verify", verifyCode.VerifyCodeHandler(s.ctn[config.AUTH]))
 }
 
 //Cors management
@@ -112,8 +102,4 @@ func Cors() gin.HandlerFunc {
 		}
 		c.Next()
 	}
-}
-
-func (s *HTTPServer) InitInternalSvc() {
-	//s.internals[]
 }

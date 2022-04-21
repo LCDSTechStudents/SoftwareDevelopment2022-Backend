@@ -1,7 +1,7 @@
 FROM alpine
 
 COPY ./main /
-COPY ./files /files
+COPY ./files/config.json /files/config.json
 
 WORKDIR /
 

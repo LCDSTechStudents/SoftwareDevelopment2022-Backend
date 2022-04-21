@@ -18,7 +18,7 @@ type TokenHandler interface {
 	VerifyToken(token string) int
 }
 
-func InitTokenHandler(config *config.Config, log *zap.Logger) TokenHandler {
+func InitTokenHandler(log *zap.Logger, config *config.Config) TokenHandler {
 	return &DefaultJWT{
 		signKey: []byte(config.Services.Auth.JWTKey),
 		log:     log,

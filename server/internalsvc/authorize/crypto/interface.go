@@ -4,7 +4,7 @@ import "SoftwareDevelopment-Backend/config"
 
 type PasswordHandler interface {
 	HashPassword(password string) string
-	Check(hashed string, hash string) bool
+	CheckPW(hashed string, hash string) bool
 }
 
 func InitPasswordHandler(config *config.Config) PasswordHandler {
