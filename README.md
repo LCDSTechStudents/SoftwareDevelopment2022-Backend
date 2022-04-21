@@ -1,2 +1,2 @@
 # SoftwareDevelopment2022-Backend
-developing ...
+This is repository for Lancaster Country Day SchooL TSA Group Software development 2022
