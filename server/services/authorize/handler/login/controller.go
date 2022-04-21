@@ -2,20 +2,18 @@ package login
 
 import (
 	"SoftwareDevelopment-Backend/server/content"
+	"SoftwareDevelopment-Backend/server/internalsvc/authorize"
+	io2 "SoftwareDevelopment-Backend/server/internalsvc/authorize/io"
 	"SoftwareDevelopment-Backend/server/services"
-	"SoftwareDevelopment-Backend/server/services/authorize/crypto"
-	"SoftwareDevelopment-Backend/server/services/authorize/io"
-	"SoftwareDevelopment-Backend/server/services/authorize/tokenHandler"
-	"SoftwareDevelopment-Backend/server/services/authorize/userpack"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
-func LoginHandler(content *content.Content, handler crypto.PasswordHandler, token tokenHandler.TokenHandler) gin.HandlerFunc {
+func LoginHandler(content *content.Content) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var login io.Login
+		var login io2.Login
+		auth := content.Data[authorize.AUTHORIZER].(*authorize.DefaultAuthorizer)
 		//parse user email and password
 		ctx.BindJSON(&login)
 		if !verify(login.Email, login.Password) {
@@ -24,23 +22,22 @@ func LoginHandler(content *content.Content, handler crypto.PasswordHandler, toke
 		}
 
 		//query if exist and valid
-		user, ok := query(login.Email, login.Password, handler, content.Db)
-
+		user, ok := auth.VerifyLoginInfo(login.Email, login.Password)
 		switch ok {
-		case userpack.WrongPassword:
-			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("wrong password")))
+		case authorize.WrongPassword:
+			ctx.JSON(http.StatusOK, services.ErrorResponse(fmt.Errorf("wrong password")))
 			return
-		case userpack.NoSuchUser:
-			ctx.JSON(http.StatusBadRequest, services.ErrorResponse(fmt.Errorf("not registered")))
+		case authorize.UserNotFound:
+			ctx.JSON(http.StatusOK, services.ErrorResponse(fmt.Errorf("not registered")))
 			return
 		}
 
 		//return JSON and generate token
-		ctx.JSON(http.StatusOK, services.SuccessResponse(io.PostUser{
+		ctx.JSON(http.StatusOK, services.SuccessResponse(io2.PostUser{
 			ID:       user.ID,
 			Email:    user.Email,
 			Nickname: user.Nickname,
-			Token:    token.GenerateToken(user.ID),
+			Token:    auth.GenerateToken(user.ID),
 		}))
 	}
 }
@@ -50,16 +47,4 @@ func verify(email string, pw string) bool {
 		return true
 	}
 	return false
-}
-
-func query(email string, password string, handler crypto.PasswordHandler, db *gorm.DB) (*userpack.User, int) {
-	var user *userpack.User
-	db.Where("email = ?", email).Find(&user)
-	if user.ID == 0 {
-		return nil, userpack.NoSuchUser
-	}
-	if !handler.Check(password, user.Password) {
-		return user, userpack.WrongPassword
-	}
-	return user, userpack.Success
 }

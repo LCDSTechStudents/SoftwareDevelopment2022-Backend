@@ -1,9 +1,9 @@
 FROM alpine
 
 COPY ./main /
-COPY ./files /files
+COPY ./files/config.json /files/config.json
 
 WORKDIR /
 
-EXPOSE 1001
+EXPOSE 8080
 CMD ["/main"]
